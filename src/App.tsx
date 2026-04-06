@@ -30,7 +30,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>('/profile.jpg');
   const [activeTab, setActiveTab] = useState('all');
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -39,7 +39,7 @@ export default function App() {
   const [name, setName] = useState('Arihara Suthan A');
   const [role, setRole] = useState('Junior GRC Analyst · UAE Regulatory Compliance Specialist');
   const [bio, setBio] = useState('B.Com Honours graduate & Company Secretary (CS Executive, ICSI) — channelling a strong foundation in corporate governance, company law, and securities regulation into practical GRC frameworks for UAE\'s most regulated sectors. Every project here is built to regulator-facing standard.');
-  const [email, setEmail] = useState('ariharasuthan@email.com');
+  const [email, setEmail] = useState('anandhhariharan7@gmail.com');
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [linkProjectId, setLinkProjectId] = useState<string | null>(null);
   const [newLinkName, setNewLinkName] = useState('');
@@ -71,7 +71,9 @@ export default function App() {
       title: 'Virtual Asset AML/CFT Compliance Programme',
       entity: 'CryptoNexus Exchange LLC · Dubai, UAE',
       desc: 'A complete AML/CFT programme for a VARA-licensed crypto exchange — 5 regulatory frameworks mapped, a 3-tier customer risk model, 15 crypto-specific red flag typologies, and a Travel Rule implementation aligned to FATF Recommendation 16.',
-      files: [] as { name: string, url: string }[],
+      files: [
+        { name: 'AML/CFT Compliance Programme', url: 'https://1drv.ms/p/c/965fd049948d3976/IQANpjH0z0MuQrjnnBq4U9uvATHVBeK6384gmi_p9xoJZeU?e=80eTuQ' }
+      ],
       stats: [
         { num: '5', label: 'Regulatory Frameworks' },
         { num: '3-Tier', label: 'Customer Risk Model' },
@@ -88,7 +90,9 @@ export default function App() {
       title: 'UAE PDPL Compliance Toolkit — VASP Data Protection',
       entity: 'NovaCoin Exchange LLC · Dubai, UAE',
       desc: 'A complete UAE PDPL readiness programme for a VARA-licensed crypto exchange — ROPA with 8 processing activities, a worked DPIA for biometric KYC, DSR workflow, consent framework for 3 mechanisms, and a 90-day remediation roadmap.',
-      files: [] as { name: string, url: string }[],
+      files: [
+        { name: 'PDPL Compliance Toolkit', url: 'https://1drv.ms/x/c/965fd049948d3976/IQACnR2wIuQnR4gouOh8rbRfAXV27kwrc-ryulTwPo2MoL4?e=JFVwnd' }
+      ],
       stats: [
         { num: '8', label: 'ROPA Activities' },
         { num: '5', label: 'Critical Gaps Found' },
@@ -105,7 +109,9 @@ export default function App() {
       title: 'AI Governance & Risk Framework — Credit AI & Fraud Detection',
       entity: 'Emirates Horizon Bank FSC LLC · Dubai, UAE',
       desc: 'A structured AI governance framework for a UAE bank\'s credit decisioning and fraud detection AI systems — 6-domain risk taxonomy, 8-control library, 5×5 risk matrix, accountability structure, regulatory mapping (CBUAE, ISO 42001, EU AI Act), and 90-day corrective action plan.',
-      files: [] as { name: string, url: string }[],
+      files: [
+        { name: 'AI Governance & Risk Framework', url: 'https://1drv.ms/p/c/965fd049948d3976/IQAH2KFJmGd7R4u05AnUxBIzAXrLBaJ-epIuodcBqt5I2vk?e=hpehyZ' }
+      ],
       stats: [
         { num: '6', label: 'Risk Domains' },
         { num: 'HIGH', label: 'Overall Risk Rating' },
@@ -122,7 +128,9 @@ export default function App() {
       title: 'Cybersecurity Compliance Gap Assessment — NESA IAR vs ISO 27001:2022',
       entity: 'Emirates Digital Authority PJSC · UAE Government',
       desc: 'A full cybersecurity gap assessment for a UAE government CII operator — 15 control domains, 75 individual controls, risk heat map with likelihood × impact scoring, dual-framework mapping (NESA IAR + ISO 27001:2022), and a phased 180-day remediation roadmap.',
-      files: [] as { name: string, url: string }[],
+      files: [
+        { name: 'Cybersecurity Compliance Gap Assessment', url: 'https://1drv.ms/p/c/965fd049948d3976/IQDOz26OXugLQJEjyruEW6RDAepa_90PBXuCgkR2Q8Tg9ik?e=19Uvef' }
+      ],
       stats: [
         { num: '15', label: 'Control Domains' },
         { num: '2.4/5', label: 'Overall Maturity' },
@@ -343,9 +351,6 @@ export default function App() {
                 </div>
 
                 <div className="mt-4 md:mt-0">
-                  <button className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all flex items-center gap-2">
-                    Get in Touch
-                  </button>
                 </div>
               </div>
 
