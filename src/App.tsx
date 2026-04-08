@@ -27,31 +27,37 @@ import {
   Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import defaultProfilePhoto from './profile.jpg';
 
 export default function App() {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [profilePhoto, setProfilePhoto] = useState<string | null>('/profile.jpg');
+  const [isLocked, setIsLocked] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('portfolio_locked') === 'true';
+    }
+    return false;
+  });
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('profile_photo') || defaultProfilePhoto;
+    }
+    return defaultProfilePhoto;
+  });
   const [activeTab, setActiveTab] = useState('all');
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   
-  // Editable content states
-  const [name, setName] = useState('Arihara Suthan A');
-  const [role, setRole] = useState('Junior GRC Analyst · UAE Regulatory Compliance Specialist');
-  const [bio, setBio] = useState('B.Com Honours graduate & Company Secretary (CS Executive, ICSI) — channelling a strong foundation in corporate governance, company law, and securities regulation into practical GRC frameworks for UAE\'s most regulated sectors. Every project here is built to regulator-facing standard.');
-  const [email, setEmail] = useState('anandhhariharan7@gmail.com');
-  const [isAddingLink, setIsAddingLink] = useState(false);
-  const [linkProjectId, setLinkProjectId] = useState<string | null>(null);
-  const [newLinkName, setNewLinkName] = useState('');
-  const [newLinkUrl, setNewLinkUrl] = useState('');
+  // Content states
+  const [name] = useState('Arihara Suthan A');
+  const [role] = useState('Junior GRC Analyst · UAE Regulatory Compliance Specialist');
+  const [bio] = useState('B.Com Honours graduate & Company Secretary (CS Executive, ICSI) — channelling a strong foundation in corporate governance, company law, and securities regulation into practical GRC frameworks for UAE\'s most regulated sectors. Every project here is built to regulator-facing standard.');
+  const [email] = useState('anandhhariharan7@gmail.com');
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    if (profilePhoto && profilePhoto !== defaultProfilePhoto) {
+      localStorage.setItem('profile_photo', profilePhoto);
+    }
+  }, [profilePhoto]);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,7 +70,21 @@ export default function App() {
     }
   };
 
-  const [projects, setProjects] = useState([
+  const lockPortfolio = () => {
+    localStorage.setItem('portfolio_locked', 'true');
+    setIsLocked(true);
+    setIsEditMode(false);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const [projects] = useState([
     {
       id: 'aml',
       category: 'aml',
@@ -143,25 +163,6 @@ export default function App() {
     }
   ]);
 
-  const addProjectLink = (projectId: string) => {
-    setLinkProjectId(projectId);
-    setNewLinkName('');
-    setNewLinkUrl('');
-    setIsAddingLink(true);
-  };
-
-  const submitNewLink = () => {
-    if (newLinkName && newLinkUrl && linkProjectId) {
-      setProjects(prev => prev.map(p => p.id === linkProjectId ? { ...p, files: [...p.files, { name: newLinkName, url: newLinkUrl }] } : p));
-      setIsAddingLink(false);
-      setLinkProjectId(null);
-    }
-  };
-
-  const removeProjectLink = (projectId: string, index: number) => {
-    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, files: p.files.filter((_, i) => i !== index) } : p));
-  };
-
   const filteredProjects = activeTab === 'all' ? projects : projects.filter(p => p.category === activeTab);
 
   return (
@@ -170,25 +171,32 @@ export default function App() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 md:px-10 h-16 flex items-center justify-between border-b border-slate-800/50 backdrop-blur-xl ${scrolled ? 'bg-slate-950/80 shadow-lg' : 'bg-transparent'}`}>
         <div className="flex items-center gap-3 font-heading font-bold text-lg tracking-tight">
           <div className="w-2 h-2 bg-sky-500 rounded-full animate-pulse" />
-          {isEditMode ? (
-            <input 
-              value={name} 
-              onChange={(e) => setName(e.target.value)}
-              className="bg-slate-800 border-none rounded px-2 py-1 outline-none focus:ring-1 ring-sky-500"
-            />
-          ) : name}
+          {name}
         </div>
         
         <div className="hidden md:flex items-center gap-2">
           <a href="#profile" className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-sky-400 hover:bg-slate-800/50 rounded-lg transition-all">Profile</a>
           <a href="#projects" className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-sky-400 hover:bg-slate-800/50 rounded-lg transition-all">Projects</a>
           <a href="#skills" className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-sky-400 hover:bg-slate-800/50 rounded-lg transition-all">Skills</a>
-          <button 
-            onClick={() => setIsEditMode(!isEditMode)}
-            className={`ml-4 px-4 py-2 text-sm font-bold rounded-lg transition-all ${isEditMode ? 'bg-emerald-500 text-white' : 'bg-sky-500 text-white hover:bg-sky-600'}`}
-          >
-            {isEditMode ? 'Save Changes' : 'Edit Mode'}
-          </button>
+          {!isLocked && (
+            <>
+              <button 
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`ml-4 px-4 py-2 text-sm font-bold rounded-lg transition-all ${isEditMode ? 'bg-emerald-500 text-white' : 'bg-sky-500 text-white hover:bg-sky-600'}`}
+              >
+                {isEditMode ? 'Save Changes' : 'Edit Mode'}
+              </button>
+              {isEditMode && (
+                <button 
+                  onClick={lockPortfolio}
+                  className="ml-2 px-4 py-2 text-sm font-bold bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                  title="Permanently remove edit buttons for deployment"
+                >
+                  Lock & Deploy
+                </button>
+              )}
+            </>
+          )}
         </div>
       </nav>
 
@@ -211,40 +219,18 @@ export default function App() {
             </div>
             
             <h1 className="text-5xl md:text-7xl font-heading font-black leading-[1.1] tracking-tighter mb-4">
-              {isEditMode ? (
-                <input 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)}
-                  className="bg-slate-800 border-none rounded px-2 py-1 outline-none focus:ring-1 ring-sky-500 w-full"
-                />
-              ) : (
-                <>
-                  {name.split(' ').slice(0, -1).join(' ')}<br />
-                  <span className="bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-500 bg-clip-text text-transparent">
-                    {name.split(' ').slice(-1)}
-                  </span>
-                </>
-              )}
+              {name.split(' ').slice(0, -1).join(' ')}<br />
+              <span className="bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-500 bg-clip-text text-transparent">
+                {name.split(' ').slice(-1)}
+              </span>
             </h1>
 
             <div className="text-xl text-slate-300 font-medium mb-6">
-              {isEditMode ? (
-                <input 
-                  value={role} 
-                  onChange={(e) => setRole(e.target.value)}
-                  className="bg-slate-800 border-none rounded px-2 py-1 outline-none focus:ring-1 ring-sky-500 w-full"
-                />
-              ) : role}
+              {role}
             </div>
 
             <div className="text-slate-400 leading-relaxed max-w-xl mb-10">
-              {isEditMode ? (
-                <textarea 
-                  value={bio} 
-                  onChange={(e) => setBio(e.target.value)}
-                  className="bg-slate-800 border-none rounded px-2 py-1 outline-none focus:ring-1 ring-sky-500 w-full h-32 resize-none"
-                />
-              ) : bio}
+              {bio}
             </div>
 
             <div className="flex flex-wrap gap-2 mb-10">
@@ -323,15 +309,25 @@ export default function App() {
                 <div className="-mt-16 relative group">
                   <div className="w-32 h-32 rounded-full border-4 border-slate-900 bg-slate-800 overflow-hidden flex items-center justify-center shadow-xl relative">
                     {profilePhoto ? (
-                      <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover" />
+                      <img 
+                        src={profilePhoto} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/user/200/200';
+                        }}
+                      />
                     ) : (
                       <User className="w-16 h-16 text-slate-600" />
                     )}
-                    <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-bold">
-                      <Camera className="w-6 h-6 mb-1" />
-                      Upload Photo
-                      <input type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" />
-                    </label>
+                    {isEditMode && (
+                      <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-bold">
+                        <Camera className="w-6 h-6 mb-1" />
+                        Upload Photo
+                        <input type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" />
+                      </label>
+                    )}
                   </div>
                   <div className="absolute bottom-2 right-0 bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-lg">Open to Work</div>
                 </div>
@@ -362,13 +358,7 @@ export default function App() {
                       About
                     </div>
                     <div className="text-sm text-slate-400 leading-relaxed space-y-4">
-                      {isEditMode ? (
-                        <textarea 
-                          value={bio} 
-                          onChange={(e) => setBio(e.target.value)}
-                          className="bg-slate-800 border-none rounded px-2 py-1 outline-none focus:ring-1 ring-sky-500 w-full h-48 resize-none"
-                        />
-                      ) : bio}
+                      {bio}
                     </div>
                   </div>
 
@@ -487,14 +477,6 @@ export default function App() {
                           <FileText className="w-3 h-3" />
                           Project Files
                         </div>
-                        {isEditMode && (
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); addProjectLink(project.id); }}
-                            className="text-[10px] font-bold text-sky-400 hover:text-sky-300 flex items-center gap-1"
-                          >
-                            + Add Link
-                          </button>
-                        )}
                       </div>
                       <div className="space-y-2">
                         {project.files.length > 0 ? (
@@ -511,14 +493,6 @@ export default function App() {
                                 <span className="text-[11px] text-slate-300 truncate font-medium">{file.name}</span>
                               </a>
                               <div className="flex items-center gap-2">
-                                {isEditMode && (
-                                  <button 
-                                    onClick={(e) => { e.stopPropagation(); removeProjectLink(project.id, idx); }}
-                                    className="text-slate-600 hover:text-red-400 transition-colors"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                )}
                                 <ExternalLink className="w-3 h-3 text-slate-600 group-hover/file:text-sky-400 transition-colors shrink-0" />
                               </div>
                             </div>
@@ -644,15 +618,7 @@ export default function App() {
           </div>
 
           <div className="text-sm font-medium text-slate-400">
-            {isEditMode ? (
-              <input 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-800 border-none rounded px-2 py-1 outline-none focus:ring-1 ring-sky-500 text-center"
-              />
-            ) : (
-              <a href={`mailto:${email}`} className="hover:text-sky-400 transition-colors">{email}</a>
-            )}
+            <a href={`mailto:${email}`} className="hover:text-sky-400 transition-colors">{email}</a>
           </div>
         </div>
       </footer>
@@ -702,14 +668,6 @@ export default function App() {
                       <div>
                         <div className="flex items-center justify-between mb-4">
                           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Project Documentation</div>
-                          {isEditMode && (
-                            <button 
-                              onClick={() => addProjectLink(projects.find(p => p.id === selectedProject)!.id)}
-                              className="text-[10px] font-bold text-sky-400 hover:text-sky-300 flex items-center gap-1"
-                            >
-                              + Add Link
-                            </button>
-                          )}
                         </div>
                         <div className="grid sm:grid-cols-2 gap-3">
                           {projects.find(p => p.id === selectedProject)?.files.length ? (
@@ -730,14 +688,6 @@ export default function App() {
                                   </div>
                                 </a>
                                 <div className="flex items-center gap-2">
-                                  {isEditMode && (
-                                    <button 
-                                      onClick={() => removeProjectLink(projects.find(p => p.id === selectedProject)!.id, idx)}
-                                      className="text-slate-600 hover:text-red-400 transition-colors"
-                                    >
-                                      <X className="w-4 h-4" />
-                                    </button>
-                                  )}
                                   <ExternalLink className="w-4 h-4 text-slate-600 group-hover/file:text-sky-400 transition-colors shrink-0" />
                                 </div>
                               </div>
@@ -793,66 +743,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Add Link Modal */}
-      <AnimatePresence>
-        {isAddingLink && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsAddingLink(false)}
-              className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl shadow-2xl relative z-10 p-8"
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-black text-white">Add Project Link</h3>
-                <button 
-                  onClick={() => setIsAddingLink(false)}
-                  className="text-slate-500 hover:text-white transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Link Display Name</label>
-                  <input 
-                    type="text" 
-                    value={newLinkName}
-                    onChange={(e) => setNewLinkName(e.target.value)}
-                    placeholder="e.g. VARA Compliance Policy"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500/50 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">URL / Link</label>
-                  <input 
-                    type="text" 
-                    value={newLinkUrl}
-                    onChange={(e) => setNewLinkUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500/50 transition-colors"
-                  />
-                </div>
-                <button 
-                  onClick={submitNewLink}
-                  disabled={!newLinkName || !newLinkUrl}
-                  className="w-full bg-sky-500 hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all mt-4"
-                >
-                  Add to Project
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
